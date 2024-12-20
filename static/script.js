@@ -37,7 +37,6 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             generatedImage.style.display = "block";
 
             // Update the result message
-            resultDiv.innerHTML = "<h2>Generated Image:</h2>";
             resultDiv.appendChild(generatedImage); // Ensure the image is appended
         } else {
             resultDiv.innerHTML = `<p>Error: ${data.error || "Unknown error occurred."}</p>`;

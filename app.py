@@ -14,7 +14,7 @@ openai.api_key = os.getenv("OPEN_AI_API_KEY")
 @app.route("/")
 def index():
     return render_template("index.html")
-    
+
 @app.route("/generate", methods=["POST"])
 def generate_image():
     try:
@@ -24,7 +24,7 @@ def generate_image():
         response = openai.Image.create(
             model="dall-e-2",
             prompt=prompt,
-            size="1024x1024",
+            size="512x512",
             quality="standard",
             n=1
         )

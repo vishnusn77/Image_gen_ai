@@ -1,60 +1,178 @@
-body {
-    font-family: Arial, sans-serif;
+/* General Reset */
+* {
     margin: 0;
     padding: 0;
-    background-color: #f4f4f9;
-    color: #333;
+    box-sizing: border-box;
 }
 
-.container {
-    max-width: 600px;
-    margin: 50px auto;
-    padding: 20px;
-    background: #fff;
-    border-radius: 10px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    text-align: center;
+/* Ensure the body and html take full height */
+html, body {
+    height: 100%;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Fonts and Colors */
+body {
+    font-family: 'Roboto', sans-serif;
+    color: #333;
+    background: linear-gradient(135deg, #f4f4f9, #e6e9f7);
+    line-height: 1.6;
+}
+
+h1, h2, p {
+    margin-bottom: 1rem;
 }
 
 h1 {
-    color: #5a67d8;
+    color: #4c5fd5;
 }
 
-input[type="text"] {
-    width: 80%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ddd;
+a {
+    color: #4c5fd5;
+    text-decoration: none;
+}
+
+/* Layout */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+/* Header */
+.header {
+    background-color: #4c5fd5;
+    color: white;
+    padding: 10px 0; /* Reduced padding */
+    text-align: center;
+}
+
+.title {
+    font-size: 2rem; /* Adjusted font size */
+}
+
+.subtitle {
+    font-size: 1rem; /* Adjusted font size */
+    margin-top: 5px;
+}
+
+/* Main Content */
+.main-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Vertically center content */
+    align-items: center; /* Horizontally center content */
+}
+
+.form {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+}
+
+.input {
+    width: 100%;
+    max-width: 500px;
+    padding: 10px 15px;
+    font-size: 1rem;
+    border: 1px solid #ccc;
     border-radius: 5px;
-    font-size: 16px;
+    outline: none;
+    transition: border-color 0.3s ease;
 }
 
-button {
+.input:focus {
+    border-color: #4c5fd5;
+}
+
+.btn {
     padding: 10px 20px;
-    font-size: 16px;
-    background-color: #5a67d8;
-    color: #fff;
+    font-size: 1rem;
+    background-color: #4c5fd5;
+    color: white;
     border: none;
     border-radius: 5px;
     cursor: pointer;
+    transition: background-color 0.3s ease;
+    display: flex;
+    align-items: center;
+    gap: 10px;
 }
 
-button:hover {
-    background-color: #4c51bf;
+.btn:hover {
+    background-color: #394bbf;
 }
 
-#result {
+.result {
+    text-align: center;
+    margin-top: 30px;
+}
+
+.generated-image {
+    margin-top: 20px;
+    max-width: 100%;
+    border: 2px solid #ddd;
+    border-radius: 10px;
+}
+
+/* Loading Spinner */
+.loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
     margin-top: 20px;
 }
 
-img {
-    max-width: 100%;
-    border-radius: 5px;
-    margin-top: 10px;
+.spinner {
+    border: 4px solid #f3f3f3;
+    border-top: 4px solid #4c5fd5;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    animation: spin 1s linear infinite;
 }
 
-#generatedImage {
-    display: block;
-    max-width: 100%;
-    margin-top: 10px;
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Footer */
+.footer {
+    background-color: #333;
+    color: white;
+    text-align: center;
+    padding: 5px 0; /* Minimal padding */
+    font-size: 0.8rem;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+}
+
+.footer p {
+    margin: 0;
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between text and icons */
+}
+
+/* Social Icons */
+.social-icon {
+    color: white;
+    text-decoration: none;
+    font-size: 1.2rem; /* Icon size */
+    transition: color 0.3s ease;
+}
+
+.social-icon:hover {
+    color: #4c5fd5; /* Hover color */
 }
