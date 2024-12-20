@@ -11,13 +11,17 @@
 <body>
     <header class="header">
         <div class="container">
-            <h1 class="title">ImageGenAI</h1>
-            <p class="subtitle">Generate stunning images from your imagination!</p>
+            <h1 class="header-title">
+                <img src="/static/logo.png" alt="Logo" class="header-logo"> ImageGenAI
+            </h1>
+            <p class="tagline">Generate stunning images from your imagination!</p>
         </div>
-    </header>
+    </header>    
+
     <main class="main-content">
         <div class="container">
             <form id="imageForm" class="form">
+                <label for="prompt" class="input-title">Enter your prompt</label>
                 <input type="text" id="prompt" class="input" placeholder="Describe the image you want..." required>
                 <button type="submit" class="btn">
                     <i class="fas fa-image"></i> Generate Image

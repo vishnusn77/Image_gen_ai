@@ -3,9 +3,11 @@ document.getElementById("imageForm").addEventListener("submit", async function (
 
     const prompt = document.getElementById("prompt").value; // Get user input
     const resultDiv = document.getElementById("result"); // Result container
+    const loading = document.getElementById("loading"); // Loading spinner
 
-    // Show a loading message
-    resultDiv.innerHTML = "<p>Generating image... Please wait.</p>";
+    // Show the spinner and clear the result container
+    loading.style.display = "flex";
+    resultDiv.innerHTML = "";
 
     try {
         // Send a POST request to the Flask backend
@@ -18,6 +20,9 @@ document.getElementById("imageForm").addEventListener("submit", async function (
         });
 
         const data = await response.json();
+
+        // Hide the spinner
+        loading.style.display = "none";
 
         // Check if the image URL is received
         if (data.image_url) {
@@ -36,13 +41,27 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             generatedImage.src = data.image_url;
             generatedImage.style.display = "block";
 
-            // Update the result message
-            resultDiv.appendChild(generatedImage); // Ensure the image is appended
+            // Create a Download button
+            let downloadButton = document.getElementById("downloadButton");
+
+            // If not, create the <button> element for download
+            if (!downloadButton) {
+                downloadButton = document.createElement("a");
+                downloadButton.id = "downloadButton";
+                downloadButton.className = "btn";
+                downloadButton.innerHTML = '<i class="fas fa-download"></i> Download Image';
+                resultDiv.appendChild(downloadButton); // Append the button to the result div
+            }
+
+            // Set the download functionality to use the Flask endpoint
+            downloadButton.href = `/download-image?image_url=${encodeURIComponent(data.image_url)}`;
+            downloadButton.style.display = "inline-block";
         } else {
             resultDiv.innerHTML = `<p>Error: ${data.error || "Unknown error occurred."}</p>`;
         }
     } catch (err) {
-        // Handle any errors
+        // Hide the spinner and display the error
+        loading.style.display = "none";
         resultDiv.innerHTML = `<p>Error: ${err.message}</p>`;
     }
 });
