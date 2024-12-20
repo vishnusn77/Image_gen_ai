@@ -5,6 +5,16 @@ document.getElementById("imageForm").addEventListener("submit", async function (
     const resultDiv = document.getElementById("result"); // Result container
     const loading = document.getElementById("loading"); // Loading spinner
 
+    // Define the word limit
+    const wordLimit = 30;
+
+    // Validate word count
+    const wordCount = prompt.trim().split(/\s+/).length; // Count words by splitting on spaces
+    if (wordCount > wordLimit) {
+        resultDiv.innerHTML = `<p style="color: red;">Error: The prompt exceeds the ${wordLimit} word limit. Please shorten it.</p>`;
+        return;
+    }
+
     // Show the spinner and clear the result container
     loading.style.display = "flex";
     resultDiv.innerHTML = "";
@@ -18,6 +28,14 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             },
             body: JSON.stringify({ prompt: prompt }),
         });
+
+        if (response.status === 429) {
+            // Handle rate limit error
+            const data = await response.json();
+            resultDiv.innerHTML = `<p style="color: red;">${data.error}</p>`;
+            loading.style.display = "none";
+            return;
+        }
 
         const data = await response.json();
 
@@ -44,16 +62,16 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             // Create a Download button
             let downloadButton = document.getElementById("downloadButton");
 
-            // If not, create the <button> element for download
+            // If not, create the <a> element for download
             if (!downloadButton) {
                 downloadButton = document.createElement("a");
                 downloadButton.id = "downloadButton";
                 downloadButton.className = "btn";
-                downloadButton.innerHTML = '<i class="fas fa-download"></i> Download Image';
+                downloadButton.innerHTML = '<i class="fas fa-download"></i> Download Image'; // Add icon and text
                 resultDiv.appendChild(downloadButton); // Append the button to the result div
             }
 
-            // Set the download functionality to use the Flask endpoint
+            // Set the download attributes
             downloadButton.href = `/download-image?image_url=${encodeURIComponent(data.image_url)}`;
             downloadButton.style.display = "inline-block";
         } else {
@@ -62,6 +80,6 @@ document.getElementById("imageForm").addEventListener("submit", async function (
     } catch (err) {
         // Hide the spinner and display the error
         loading.style.display = "none";
-        resultDiv.innerHTML = `<p>Error: ${err.message}</p>`;
+        resultDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
     }
 });
