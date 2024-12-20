@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ImageGenAI</title>
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>ImageGenAI</h1>
+        <p>Generate stunning images from text prompts!</p>
+        <form id="imageForm">
+            <input type="text" id="prompt" placeholder="Enter your prompt here..." required>
+            <button type="submit">Generate</button>
+        </form>
+        <div id="result">
+            <h2>Generated Image:</h2>
+            <img id="generatedImage" alt="Your AI-generated image will appear here." style="display: none;">
+        </div>
+    </div>
+    <script src="/static/script.js"></script>
+</body>
+</html>
