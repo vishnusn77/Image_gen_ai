@@ -33,9 +33,9 @@ def generate_image():
         prompt = data.get("prompt", "A beautiful sunset over the ocean")
 
         response = openai.Image.create(
-            model="dall-e-2",
+            model="dall-e-3",
             prompt=prompt,
-            size="512x512",
+            size="1024x1024",
             quality="standard",
             n=1,
         )
