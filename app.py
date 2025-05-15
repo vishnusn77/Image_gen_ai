@@ -36,6 +36,7 @@ def generate_image():
             model="dall-e-3",
             prompt=prompt,
             size="1024x1024",
+            quality="standard",
             n=1,
         )
         image_url = response["data"][0]["url"]
