@@ -132,10 +132,11 @@ a {
 }
 
 .generated-image {
-    margin-top: 20px;
-    max-width: 100%;
     border: 2px solid #ddd;
-    border-radius: 10px;
+    width: 100%;
+    max-width: 512px;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
 }
 
 .loading {
