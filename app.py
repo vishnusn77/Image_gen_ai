@@ -7,19 +7,16 @@ from dotenv import load_dotenv
 import requests
 from io import BytesIO
 
-# Load environment variables from .env file
 load_dotenv()
 
 app = Flask(__name__)
 
-# Initialize Flask-Limiter
 limiter = Limiter(
-    get_remote_address,  # Identify users by their IP address
+    get_remote_address, 
     app=app,
-    default_limits=["3 per day"],  # Default limit: 3 request per day per IP
+    default_limits=["3 per day"], 
 )
 
-# Load OpenAI API key
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 @app.route("/")
@@ -28,7 +25,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
-@limiter.limit("3 per day")  # Restrict this endpoint to 3 request per day per IP
+@limiter.limit("3 per day") 
 def generate_image():
     """Generate an image using OpenAI API"""
     try:
@@ -55,12 +52,10 @@ def download_image():
         if not image_url:
             return jsonify({"error": "No image URL provided"}), 400
 
-        # Fetch the image from the provided URL
         response = requests.get(image_url)
         if response.status_code != 200:
             return jsonify({"error": "Failed to fetch the image"}), 500
 
-        # Serve the image as a downloadable file
         return send_file(
             BytesIO(response.content),
             mimetype="image/png",
