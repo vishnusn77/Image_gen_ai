@@ -20,12 +20,7 @@ document.getElementById("imageForm").addEventListener("submit", async function (
         const data = await response.json();
         loading.style.display = "none";
 
-        if (response.status === 429) {
-            resultDiv.innerHTML = `<p style="color: red;">Daily limit reached. Try again tomorrow.</p>`;
-            return;
-        }
-
-        if (!response.ok || !data.image_url) {
+        if (response.status !== 200 || !data.image_url) {
             resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error || "Image generation failed."}</p>`;
             return;
         }
@@ -56,6 +51,6 @@ document.getElementById("imageForm").addEventListener("submit", async function (
 
     } catch (err) {
         loading.style.display = "none";
-        resultDiv.innerHTML = `<p style="color: red;">Unexpected Error: ${err.message}</p>`;
+        resultDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
     }
 });
