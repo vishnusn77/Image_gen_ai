@@ -1,25 +1,34 @@
 from flask import Flask, request, jsonify, render_template, send_file
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import openai
 import os
-from dotenv import load_dotenv
 import requests
 from io import BytesIO
+from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
 
+def get_custom_anon_id():
+    return request.headers.get("X-ANON-ID") or get_remote_address()
+
+limiter = Limiter(
+    app=app,
+    key_func=get_custom_anon_id,
+    default_limits=[]
+)
+
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 @app.route("/")
 def index():
-    """Always render the homepage, no rate limit applied"""
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
-
+@limiter.limit("1 per day")
 def generate_image():
-    """Generate an image using OpenAI API"""
     try:
         data = request.json
         prompt = data.get("prompt", "A beautiful sunset over the ocean")
@@ -38,7 +47,6 @@ def generate_image():
 
 @app.route("/download-image", methods=["GET"])
 def download_image():
-    """Serve the image as a downloadable file"""
     try:
         image_url = request.args.get("image_url")
         if not image_url:

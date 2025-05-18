@@ -9,18 +9,33 @@ document.getElementById("imageForm").addEventListener("submit", async function (
     resultDiv.innerHTML = "";
 
     try {
+        let anonId = localStorage.getItem("anon_id");
+        if (!anonId) {
+            anonId = crypto.randomUUID();
+            localStorage.setItem("anon_id", anonId);
+        }
+
         const response = await fetch("/generate", {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "X-ANON-ID": anonId 
             },
             body: JSON.stringify({ prompt }),
         });
 
-        const data = await response.json();
+        const contentType = response.headers.get("Content-Type") || "";
+        const isJson = contentType.includes("application/json");
+        const data = isJson ? await response.json() : {};
+
         loading.style.display = "none";
 
-        if (response.status !== 200 || !data.image_url) {
+        if (response.status === 429) {
+            resultDiv.innerHTML = `<p style="color: red;">You've reached your daily limit. Please try again tomorrow.</p>`;
+            return;
+        }
+
+        if (!response.ok || !data.image_url) {
             resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error || "Image generation failed."}</p>`;
             return;
         }
@@ -51,6 +66,6 @@ document.getElementById("imageForm").addEventListener("submit", async function (
 
     } catch (err) {
         loading.style.display = "none";
-        resultDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+        resultDiv.innerHTML = `<p style="color: red;">Unexpected Error: ${err.message}</p>`;
     }
 });
