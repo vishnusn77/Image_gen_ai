@@ -12,7 +12,7 @@ load_dotenv()
 app = Flask(__name__)
 
 limiter = Limiter(
-    get_remote_address,
+    key_func=lambda: request.headers.get("X-Forwarded-For", request.remote_addr),
     app=app,
     default_limits=[]
 )
