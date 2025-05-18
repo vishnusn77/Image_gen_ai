@@ -27,7 +27,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
-@limiter.limit("1 per day")
+@limiter.limit("3 per day")
 def generate_image():
     try:
         data = request.json
