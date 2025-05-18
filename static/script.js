@@ -17,22 +17,30 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             body: JSON.stringify({ prompt }),
         });
 
-        if (response.status === 429) {
-            loading.style.display = "none";
-            try {
-                const data = await response.json();
-                resultDiv.innerHTML = `<p style="color:red;">${data.error || "Too many requests."}</p>`;
-            } catch {
-                resultDiv.innerHTML = `<p style="color:red;">You’ve hit the daily limit. Try again later.</p>`;
+        loading.style.display = "none";
+
+        if (!response.ok) {
+            if (response.status === 429) {
+                resultDiv.innerHTML = `<p style="color: red;">You’ve reached the daily limit. Please try again tomorrow.</p>`;
+                return;
             }
+
+            let errorMsg = "Something went wrong.";
+            try {
+                const errorData = await response.json();
+                errorMsg = errorData.error || errorMsg;
+            } catch {
+
+            }
+
+            resultDiv.innerHTML = `<p style="color: red;">Error: ${errorMsg}</p>`;
             return;
         }
 
         const data = await response.json();
-        loading.style.display = "none";
 
-        if (response.status !== 200 || !data.image_url) {
-            resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error || "Image generation failed."}</p>`;
+        if (!data.image_url) {
+            resultDiv.innerHTML = `<p style="color: red;">Image generation failed. Please try again.</p>`;
             return;
         }
 
@@ -62,6 +70,6 @@ document.getElementById("imageForm").addEventListener("submit", async function (
 
     } catch (err) {
         loading.style.display = "none";
-        resultDiv.innerHTML = `<p style="color: red;">Error: ${err.message}</p>`;
+        resultDiv.innerHTML = `<p style="color: red;">Unexpected Error: ${err.message}</p>`;
     }
 });

@@ -6,28 +6,43 @@ import os
 from dotenv import load_dotenv
 import requests
 from io import BytesIO
+from uuid import uuid4
 
 load_dotenv()
 
 app = Flask(__name__)
 
+def get_anon_id():
+    return request.cookies.get("anon_id") or request.remote_addr
+
 limiter = Limiter(
-    key_func=lambda: request.headers.get("X-Forwarded-For", request.remote_addr),
+    key_func=get_anon_id,
     app=app,
     default_limits=[]
 )
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
+@app.after_request
+def set_anon_id_cookie(response):
+    if not request.cookies.get("anon_id"):
+        response.set_cookie(
+            "anon_id",
+            str(uuid4()),
+            max_age=60 * 60 * 24 * 7,
+            httponly=True,
+            samesite='Lax',
+            secure=False
+        )
+    return response
+
 @app.route("/")
 def index():
-    """Always render the homepage, no rate limit applied"""
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
 @limiter.limit("3 per day")
 def generate_image():
-    """Generate an image using OpenAI API"""
     try:
         data = request.json
         prompt = data.get("prompt", "A beautiful sunset over the ocean")
@@ -46,7 +61,6 @@ def generate_image():
 
 @app.route("/download-image", methods=["GET"])
 def download_image():
-    """Serve the image as a downloadable file"""
     try:
         image_url = request.args.get("image_url")
         if not image_url:
@@ -67,9 +81,3 @@ def download_image():
 
 if __name__ == "__main__":
     app.run(debug=True)
-
-@app.errorhandler(429)
-def ratelimit_error(e):
-    return jsonify({
-        "error": "Rate limit exceeded. You can only generate 3 images per day."
-    }), 429
