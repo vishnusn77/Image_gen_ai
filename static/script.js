@@ -17,6 +17,17 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             body: JSON.stringify({ prompt }),
         });
 
+        if (response.status === 429) {
+            loading.style.display = "none";
+            try {
+                const data = await response.json();
+                resultDiv.innerHTML = `<p style="color:red;">${data.error || "Too many requests."}</p>`;
+            } catch {
+                resultDiv.innerHTML = `<p style="color:red;">You’ve hit the daily limit. Try again later.</p>`;
+            }
+            return;
+        }
+
         const data = await response.json();
         loading.style.display = "none";
 

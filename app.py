@@ -12,9 +12,9 @@ load_dotenv()
 app = Flask(__name__)
 
 limiter = Limiter(
-    get_remote_address, 
+    get_remote_address,
     app=app,
-    default_limits=["3 per day"], 
+    default_limits=[]
 )
 
 openai.api_key = os.getenv("OPEN_AI_API_KEY")
@@ -25,7 +25,7 @@ def index():
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
-@limiter.limit("3 per day") 
+@limiter.limit("3 per day")
 def generate_image():
     """Generate an image using OpenAI API"""
     try:
@@ -65,12 +65,11 @@ def download_image():
     except Exception as e:
         return jsonify({"error": str(e)}), 500
 
-@app.errorhandler(429)
-def ratelimit_error(e):
-    """Handle rate limit errors"""
-    return jsonify({
-        "error": "Your daily limit has exceeded, please try again tomorrow."
-    }), 429
-
 if __name__ == "__main__":
     app.run(debug=True)
+
+@app.errorhandler(429)
+def ratelimit_error(e):
+    return jsonify({
+        "error": "Rate limit exceeded. You can only generate 3 images per day."
+    }), 429
