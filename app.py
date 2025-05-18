@@ -3,46 +3,59 @@ from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import openai
 import os
-from dotenv import load_dotenv
 import requests
 from io import BytesIO
 from uuid import uuid4
+from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__)
 
+# -----------------------------
+# Cookie-based rate limit key
+# -----------------------------
 def get_anon_id():
-    return request.cookies.get("anon_id") or request.remote_addr
+    return request.cookies.get("anon_id") or get_remote_address()
 
 limiter = Limiter(
-    key_func=get_anon_id,
     app=app,
-    default_limits=[]
+    key_func=get_anon_id,
+    default_limits=[]  # we'll add it route-specific
 )
 
-openai.api_key = os.getenv("OPEN_AI_API_KEY")
-
+# -----------------------------
+# Set cookie if not present
+# -----------------------------
 @app.after_request
-def set_anon_id_cookie(response):
-    if request.endpoint == 'index' and not request.cookies.get("anon_id"):
+def set_cookie(response):
+    if not request.cookies.get("anon_id"):
         response.set_cookie(
             "anon_id",
             str(uuid4()),
-            max_age=60 * 60 * 24 * 7,
+            max_age=60 * 60 * 24 * 7,  # 7 days
             httponly=True,
-            samesite='Lax',
-            secure=False 
+            samesite="Lax",
+            secure=False  # Set to True if using HTTPS
         )
     return response
+
+# -----------------------------
+# Routes
+# -----------------------------
+openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 @app.route("/")
 def index():
     return render_template("index.html")
 
 @app.route("/generate", methods=["POST"])
-@limiter.limit("3 per day")
+@limiter.limit("2 per day")
 def generate_image():
+    anon_id = request.cookies.get("anon_id")
+    if not anon_id:
+        return jsonify({"error": "Session not initialized. Please reload the page."}), 400
+
     try:
         data = request.json
         prompt = data.get("prompt", "A beautiful sunset over the ocean")

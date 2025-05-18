@@ -9,6 +9,13 @@ document.getElementById("imageForm").addEventListener("submit", async function (
     resultDiv.innerHTML = "";
 
     try {
+        // Check if anon_id cookie is present
+        if (!document.cookie.includes("anon_id")) {
+            loading.style.display = "none";
+            resultDiv.innerHTML = `<p style="color: red;">Session not initialized. Please reload the page.</p>`;
+            return;
+        }
+
         const response = await fetch("/generate", {
             method: "POST",
             headers: {
@@ -17,30 +24,23 @@ document.getElementById("imageForm").addEventListener("submit", async function (
             body: JSON.stringify({ prompt }),
         });
 
+        const contentType = response.headers.get("Content-Type") || "";
+        const isJson = contentType.includes("application/json");
+
+        let data = {};
+        if (isJson) {
+            data = await response.json();
+        }
+
         loading.style.display = "none";
 
-        if (!response.ok) {
-            if (response.status === 429) {
-                resultDiv.innerHTML = `<p style="color: red;">You’ve reached the daily limit. Please try again tomorrow.</p>`;
-                return;
-            }
-
-            let errorMsg = "Something went wrong.";
-            try {
-                const errorData = await response.json();
-                errorMsg = errorData.error || errorMsg;
-            } catch {
-
-            }
-
-            resultDiv.innerHTML = `<p style="color: red;">Error: ${errorMsg}</p>`;
+        if (response.status === 429) {
+            resultDiv.innerHTML = `<p style="color: red;">You’ve reached the daily limit of 2 generations. Please come back tomorrow.</p>`;
             return;
         }
 
-        const data = await response.json();
-
-        if (!data.image_url) {
-            resultDiv.innerHTML = `<p style="color: red;">Image generation failed. Please try again.</p>`;
+        if (!response.ok || !data.image_url) {
+            resultDiv.innerHTML = `<p style="color: red;">Error: ${data.error || "Image generation failed."}</p>`;
             return;
         }
 
