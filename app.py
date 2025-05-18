@@ -1,4 +1,4 @@
-from flask import Flask, request, jsonify, render_template, send_file
+from flask import Flask, request, jsonify, render_template, send_file, make_response
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
 import openai
@@ -9,41 +9,40 @@ from uuid import uuid4
 from dotenv import load_dotenv
 
 load_dotenv()
-
 app = Flask(__name__)
 
-# -----------------------------
-# Cookie-based rate limit key
-# -----------------------------
-def get_anon_id():
+# Limiter using anon_id or IP fallback
+def get_user_key():
     return request.cookies.get("anon_id") or get_remote_address()
 
 limiter = Limiter(
     app=app,
-    key_func=get_anon_id,
-    default_limits=[]  # we'll add it route-specific
+    key_func=get_user_key,
+    default_limits=[]  # use per-route limit
 )
 
-# -----------------------------
-# Set cookie if not present
-# -----------------------------
-@app.after_request
-def set_cookie(response):
+openai.api_key = os.getenv("OPEN_AI_API_KEY")
+
+# Set anon_id cookie ALWAYS on any request
+@app.before_request
+def ensure_anon_id_cookie():
     if not request.cookies.get("anon_id"):
+        request.anon_id = str(uuid4())
+    else:
+        request.anon_id = request.cookies.get("anon_id")
+
+@app.after_request
+def set_cookie_if_needed(response):
+    if hasattr(request, "anon_id") and not request.cookies.get("anon_id"):
         response.set_cookie(
             "anon_id",
-            str(uuid4()),
-            max_age=60 * 60 * 24 * 7,  # 7 days
+            request.anon_id,
+            max_age=60 * 60 * 24 * 7,
             httponly=True,
             samesite="Lax",
-            secure=False  # Set to True if using HTTPS
+            secure=False  # True only if HTTPS
         )
     return response
-
-# -----------------------------
-# Routes
-# -----------------------------
-openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 @app.route("/")
 def index():
@@ -52,10 +51,6 @@ def index():
 @app.route("/generate", methods=["POST"])
 @limiter.limit("2 per day")
 def generate_image():
-    anon_id = request.cookies.get("anon_id")
-    if not anon_id:
-        return jsonify({"error": "Session not initialized. Please reload the page."}), 400
-
     try:
         data = request.json
         prompt = data.get("prompt", "A beautiful sunset over the ocean")
