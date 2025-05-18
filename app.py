@@ -32,7 +32,7 @@ def set_anon_id_cookie(response):
             max_age=60 * 60 * 24 * 7,
             httponly=True,
             samesite='Lax',
-            secure=False  # True only if you're using HTTPS
+            secure=False 
         )
     return response
 
