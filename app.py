@@ -25,14 +25,14 @@ openai.api_key = os.getenv("OPEN_AI_API_KEY")
 
 @app.after_request
 def set_anon_id_cookie(response):
-    if not request.cookies.get("anon_id"):
+    if request.endpoint == 'index' and not request.cookies.get("anon_id"):
         response.set_cookie(
             "anon_id",
             str(uuid4()),
             max_age=60 * 60 * 24 * 7,
             httponly=True,
             samesite='Lax',
-            secure=False
+            secure=False  # True only if you're using HTTPS
         )
     return response
 
